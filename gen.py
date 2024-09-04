@@ -10,7 +10,7 @@ YEARS_BACK_MIN = 1
 YEARS_BACK_MAX = 25
 AMOUNT_MIN = 1000
 AMOUNT_MAX = 5000
-NUM_RECORDS = 2
+NUM_RECORDS = 5
 BASE_NAMES = ["Alice", "Bob", "Carol", "Dave"]
 LAST_NAMES = ["Smith", "Johnson", "Lee", "Brown"]
 

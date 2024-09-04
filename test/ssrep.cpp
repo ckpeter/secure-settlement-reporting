@@ -59,9 +59,9 @@ int main(int argc, char** argv) {
   //auto gcount = (PlainCircExec*)CircuitExecution::circ_exec->gid; // if plain protocol
   auto gcount = CircuitExecution::circ_exec->num_and();
 
-  cout << " (" << (std::chrono::system_clock::now() - start).count() / 1000/1000
-    << " ms | " << gcount
-    << " gates)" << endl;
+  cout << " (" << (std::chrono::system_clock::now() - start).count() / 1000.0/1000/1000
+    << " s | " << gcount / 1000.0 / 1000
+    << " M gates)" << endl;
 
   delete io;
   return 0;

@@ -12,6 +12,8 @@
 #include "emp-tool/utils/hash.h"
 #include "emp-tool/circuits/number.h"
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "utils.cpp"
 
 using namespace std;
@@ -152,32 +154,79 @@ template <size_t size> Integer makeInteger(const bitset<size>& bits, int party) 
 
 class SecureSubmission : public Swappable<SecureSubmission> {
 public:
+  Integer settlement_key;
   Integer amount;
   Integer year_since_1900;
+  Integer signature_date;
   Bit dup;
 
-  SecureSubmission(Integer amount, Integer year_since_1900) {    
+  SecureSubmission(Integer settlement_key, Integer amount, Integer year_since_1900, Integer signature_date) {
+    this->settlement_key = settlement_key;
     this->amount = amount;
     this->year_since_1900 = year_since_1900;
+    this->signature_date = signature_date;
   }
 
   SecureSubmission(Submission a, Submission b) {
+    this->settlement_key = makeInteger(a.settlement_key, ALICE) ^ makeInteger(b.settlement_key, BOB);
     this->amount = makeInteger(a.amount, ALICE) ^ makeInteger(b.amount, BOB);
     this->year_since_1900 = makeInteger(a.year_since_1900, ALICE) ^ makeInteger(b.year_since_1900, BOB);
+    this->signature_date = makeInteger(a.signature_date, ALICE) ^ makeInteger(b.signature_date, BOB);
   }
 
   SecureSubmission select(const Bit & sel, const SecureSubmission& rhs) const {
     SecureSubmission nval(
+      this->settlement_key.select(sel, rhs.settlement_key),
       this->amount.select(sel, rhs.amount),
-      this->year_since_1900.select(sel, rhs.year_since_1900)
+      this->year_since_1900.select(sel, rhs.year_since_1900),
+      this->signature_date.select(sel, rhs.signature_date)
       );
 
     return nval;
+  }
+
+  Bit bit_equal(const SecureSubmission& rhs) const {
+    return (this->settlement_key == rhs.settlement_key) &
+      (this->amount == rhs.amount) &
+      (this->year_since_1900 == rhs.year_since_1900) &
+      (this->signature_date == rhs.signature_date);
   }
 };
 
 Bit bit_sort_by_amount(SecureSubmission a, SecureSubmission b) {
   return a.amount < b.amount;
+}
+
+Bit bit_sort_by_settlement_key(SecureSubmission a, SecureSubmission b) {
+  return a.settlement_key < b.settlement_key;
+}
+
+string textualize(Integer k) {
+
+  boost::dynamic_bitset<> x(k.size());
+  for (int i = 0; i < k.size(); i++) {
+    // x[i] = k[i].reveal<bool>(); // normal order
+    x[k.size()-i-1] = k[i].reveal<bool>(); // reverse order
+  }
+
+    std::vector<unsigned char> buffer((x.size()) / 8, 0); // Pad with zeros
+    boost::to_block_range(x, buffer.begin());
+
+    if(true) {
+      std::string result;
+      for (unsigned char c : buffer) {
+          if (c >= 32 && c <= 126) { // Printable ASCII range
+              result += c;
+          } else {
+              result += '.'; // Non-printable character placeholder
+          }
+      }
+      return result;
+
+    } else {
+      return std::string(buffer.begin(), buffer.end());
+    }
+
 }
 
 int parser_run(int party) {
@@ -204,7 +253,7 @@ int parser_run(int party) {
         auto last = secureSubmissions[0];
 
         for (size_t i = 1; i < subA.size(); ++i) {
-          secureSubmissions[i].dup = last.amount == secureSubmissions[i].amount;
+          secureSubmissions[i].dup = last.bit_equal(secureSubmissions[i]);
           last = secureSubmissions[i];
         }
 
@@ -214,14 +263,14 @@ int parser_run(int party) {
         Integer one = Integer(32, 1, PUBLIC);
 
         vector<Integer> histogram;
-        vector<uint64_t> histogramBounds = {0, 2000, 5000, 9000};
+        vector<uint64_t> histogramBounds = {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000};
 
         for(size_t i = 0; i < histogramBounds.size(); i++) {
           histogram.push_back(Integer(32, 0, PUBLIC));
         }
 
         vector<Integer> yearly;
-        vector<uint8_t> yearlyBounds = {0, 119, 120, 121, 122, 123, 124};
+        vector<uint8_t> yearlyBounds = {0, 118, 119, 120, 121, 122, 123, 124};
 
         for(size_t i = 0; i < yearlyBounds.size(); i++) {
           yearly.push_back(Integer(32, 0, PUBLIC));
@@ -260,18 +309,30 @@ int parser_run(int party) {
           cout << histogramBounds[i] << " - " << histogramBounds[i + 1] << ": " << histogram[i].reveal<uint64_t>() << endl;
         }
 
-        cout << "Yearly (not working):" << endl;
+        cout << "Yearly:" << endl;
         for(size_t i = 0; i < yearly.size()-1; i++) {
-          cout << (uint64_t) yearlyBounds[i] << " - " << (uint64_t) yearlyBounds[i + 1] << ": " << yearly[i].reveal<uint64_t>() << endl;
+          cout << (uint64_t) yearlyBounds[i] + 1900 << " - " <<
+           (uint64_t) yearlyBounds[i + 1] + 1900 << ": " <<
+           yearly[i].reveal<uint64_t>() << endl;
         }
 
         cout << "Secure submissions printout:" << endl;
+        size_t printed = 0;
 
         for(const auto& sub : secureSubmissions) {
+          printed++;
+
           cout <<
-          "amount: " << sub.amount.reveal<uint64_t>() << 
+          " settlement_key: " << textualize(sub.settlement_key) <<
+          " amount: " << sub.amount.reveal<uint64_t>() << 
           " year: " << sub.year_since_1900.reveal<uint64_t>() <<
+          " dup: " << sub.dup.reveal<bool>() <<
           endl;
+
+          if(printed > 10) {
+            cout << "snip..." << endl;
+            break;
+          }
         }
 
     } catch (const exception& e) {
