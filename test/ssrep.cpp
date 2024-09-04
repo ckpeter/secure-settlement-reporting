@@ -7,6 +7,8 @@
 #include "emp-tool/utils/hash.h"
 #include "emp-tool/circuits/number.h"
 
+#include "parser.cpp"
+
 using namespace std;
 
 void mpc_run() {
@@ -47,7 +49,8 @@ int main(int argc, char** argv) {
   // ***** Run program logic
   cout << "\n===== Program running...\n";
   
-  mpc_run();
+  parser_run(party);
+  // mpc_run();
   
   cout << "\n===== Program completed ";  
   // ***** End program logic
