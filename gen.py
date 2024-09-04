@@ -119,7 +119,7 @@ def main():
 
     # Write submissions to a plaintext file without headers for comparison
     with open('submissions.txt', 'w', newline='') as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator='\n')
         for submission in original_submissions:
             writer.writerow(submission)
 
@@ -127,9 +127,9 @@ def main():
     with open('submission_bits.txt', 'w', newline='') as f, \
          open('submission_bits_a.txt', 'w', newline='') as fa, \
          open('submission_bits_b.txt', 'w', newline='') as fb:
-        writer = csv.writer(f)
-        writer_a = csv.writer(fa)
-        writer_b = csv.writer(fb)
+        writer = csv.writer(f, lineterminator='\n')
+        writer_a = csv.writer(fa, lineterminator='\n')
+        writer_b = csv.writer(fb, lineterminator='\n')
         for submission in submissions:
             writer.writerow(submission)
             parts_a, parts_b = zip(*(xor_split(bit) for bit in submission))
@@ -142,7 +142,7 @@ def main():
          open('submission_bits_check.txt', 'w', newline='') as f_check:
         reader_a = csv.reader(fa)
         reader_b = csv.reader(fb)
-        writer_check = csv.writer(f_check)
+        writer_check = csv.writer(f_check, lineterminator='\n')
         for row_a, row_b in zip(reader_a, reader_b):
             reconstructed = ["".join(str(int(a) ^ int(b)) for a, b in zip(part_a, part_b)) for part_a, part_b in zip(row_a, row_b)]
             writer_check.writerow(reconstructed)
