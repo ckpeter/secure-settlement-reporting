@@ -20,9 +20,12 @@ using namespace std;
 
 class Submission {
 public:
-    bitset<480> settlement_key;
+    // bitset<480> settlement_key;
+    bitset<16> day_since_2000;
+    bitset<320> party1;
+    bitset<320> party2;
     bitset<32> amount;
-    bitset<8> year_since_1900;
+    bitset<8> year_since_2000;
     bitset<64> signature_date;
     bitset<160> submitter;
     bitset<256> commitment_token;
@@ -34,14 +37,21 @@ public:
         string field;
         Submission sub;
 
-        if (!parseField(ss, field, 480)) throw runtime_error("Field error in 'settlement_key': " + errorDetails(field, 480));
-        sub.settlement_key = bitset<480>(field);
+        //if (!parseField(ss, field, 480)) throw runtime_error("Field error in 'settlement_key': " + errorDetails(field, 480));
+        //sub.settlement_key = bitset<480>(field);
+
+        if (!parseField(ss, field, 16)) throw runtime_error("Field error in 'day_since_2000': " + errorDetails(field, 16));
+        sub.day_since_2000 = bitset<16>(field);
+        if (!parseField(ss, field, 320)) throw runtime_error("Field error in 'party1': " + errorDetails(field, 480));
+        sub.party1 = bitset<320>(field);
+        if (!parseField(ss, field, 320)) throw runtime_error("Field error in 'party2': " + errorDetails(field, 480));
+        sub.party2 = bitset<320>(field);
 
         if (!parseField(ss, field, 32)) throw runtime_error("Field error in 'amount': " + errorDetails(field, 32));
         sub.amount = bitset<32>(field);
 
-        if (!parseField(ss, field, 8)) throw runtime_error("Field error in 'year_since_1900': " + errorDetails(field, 8));
-        sub.year_since_1900 = bitset<8>(field);
+        if (!parseField(ss, field, 8)) throw runtime_error("Field error in 'year_since_2000': " + errorDetails(field, 8));
+        sub.year_since_2000 = bitset<8>(field);
 
         if (!parseField(ss, field, 64)) throw runtime_error("Field error in 'signature_date': " + errorDetails(field, 64));
         sub.signature_date = bitset<64>(field);
@@ -73,9 +83,12 @@ public:
     }
 
     void xorWith(const Submission& other) {
-        settlement_key ^= other.settlement_key;
+        // settlement_key ^= other.settlement_key;
+        day_since_2000 ^= other.day_since_2000;
+        party1 ^= other.party1;
+        party2 ^= other.party2;
         amount ^= other.amount;
-        year_since_1900 ^= other.year_since_1900;
+        year_since_2000 ^= other.year_since_2000;
         signature_date ^= other.signature_date;
         submitter ^= other.submitter;
         commitment_token ^= other.commitment_token;
@@ -85,9 +98,12 @@ public:
 
     string toString() const {
         stringstream ss;
-        ss << settlement_key.to_string().substr(480 - 480) << ','
+        ss //settlement_key.to_string().substr(480 - 480) << ','
+            << day_since_2000.to_string().substr(16 - 16) << ','
+            << party1.to_string().substr(480 - 480) << ','
+            << party2.to_string().substr(480 - 480) << ','
            << amount.to_string().substr(32 - 32) << ','
-           << year_since_1900.to_string().substr(8 - 8) << ','
+           << year_since_2000.to_string().substr(8 - 8) << ','
            << signature_date.to_string().substr(64 - 64) << ','
            << submitter.to_string().substr(160 - 160) << ','
            << commitment_token.to_string().substr(256 - 256) << ','
@@ -154,31 +170,46 @@ template <size_t size> Integer makeInteger(const bitset<size>& bits, int party) 
 
 class SecureSubmission : public Swappable<SecureSubmission> {
 public:
-  Integer settlement_key;
+  // Integer settlement_key;
+  Integer day_since_2000;
+  Integer party1;
+  Integer party2;
   Integer amount;
-  Integer year_since_1900;
+  Integer year_since_2000;
   Integer signature_date;
   Bit dup;
 
-  SecureSubmission(Integer settlement_key, Integer amount, Integer year_since_1900, Integer signature_date) {
-    this->settlement_key = settlement_key;
+  SecureSubmission(Integer day_since_2000, Integer party1, Integer party2, Integer amount, Integer year_since_2000, Integer signature_date) {
+    //this->settlement_key = settlement_key;
+    this->day_since_2000 = day_since_2000;
+    this->party1 = party1;
+    this->party2 = party2;
+
     this->amount = amount;
-    this->year_since_1900 = year_since_1900;
+    this->year_since_2000 = year_since_2000;
     this->signature_date = signature_date;
   }
 
   SecureSubmission(Submission a, Submission b) {
-    this->settlement_key = makeInteger(a.settlement_key, ALICE) ^ makeInteger(b.settlement_key, BOB);
+    // this->settlement_key = makeInteger(a.settlement_key, ALICE) ^ makeInteger(b.settlement_key, BOB);
+    this->day_since_2000 = makeInteger(a.day_since_2000, ALICE) ^ makeInteger(b.day_since_2000, BOB);
+    this->party1 = makeInteger(a.party1, ALICE) ^ makeInteger(b.party1, BOB);
+    this->party2 = makeInteger(a.party2, ALICE) ^ makeInteger(b.party2, BOB);
+    
     this->amount = makeInteger(a.amount, ALICE) ^ makeInteger(b.amount, BOB);
-    this->year_since_1900 = makeInteger(a.year_since_1900, ALICE) ^ makeInteger(b.year_since_1900, BOB);
+    this->year_since_2000 = makeInteger(a.year_since_2000, ALICE) ^ makeInteger(b.year_since_2000, BOB);
     this->signature_date = makeInteger(a.signature_date, ALICE) ^ makeInteger(b.signature_date, BOB);
   }
 
   SecureSubmission select(const Bit & sel, const SecureSubmission& rhs) const {
     SecureSubmission nval(
-      this->settlement_key.select(sel, rhs.settlement_key),
+      // this->settlement_key.select(sel, rhs.settlement_key),
+      this->day_since_2000.select(sel, rhs.day_since_2000),
+      this->party1.select(sel, rhs.party1),
+      this->party2.select(sel, rhs.party2),
+
       this->amount.select(sel, rhs.amount),
-      this->year_since_1900.select(sel, rhs.year_since_1900),
+      this->year_since_2000.select(sel, rhs.year_since_2000),
       this->signature_date.select(sel, rhs.signature_date)
       );
 
@@ -186,9 +217,12 @@ public:
   }
 
   Bit bit_equal(const SecureSubmission& rhs) const {
-    return (this->settlement_key == rhs.settlement_key) &
+    return // (this->settlement_key == rhs.settlement_key) &
+      (this->day_since_2000 == rhs.day_since_2000) &
+      (this->party1 == rhs.party1) &
+      (this->party2 == rhs.party2) &
       (this->amount == rhs.amount) &
-      (this->year_since_1900 == rhs.year_since_1900) &
+      (this->year_since_2000 == rhs.year_since_2000) &
       (this->signature_date == rhs.signature_date);
   }
 };
@@ -198,15 +232,25 @@ Bit bit_sort_by_amount(SecureSubmission a, SecureSubmission b) {
 }
 
 Bit bit_sort_by_settlement_key(SecureSubmission a, SecureSubmission b) {
-  return a.settlement_key < b.settlement_key;
+  //return a.settlement_key < b.settlement_key;
+  Bit party2_val = a.party2 < b.party2;
+  Bit party1_val = a.party1 < b.party1;
+  Bit party1_eq = a.party1 == b.party1;
+  Bit day_since_2000_val = a.day_since_2000 < b.day_since_2000;
+  Bit day_since_2000_eq = a.day_since_2000 == b.day_since_2000;
+
+  Bit val = day_since_2000_val;
+  val = val.select(day_since_2000_eq, party1_val);
+  val = val.select(day_since_2000_eq & party1_eq, party2_val);
+
+  return val;
 }
 
 string textualize(Integer k) {
-
   boost::dynamic_bitset<> x(k.size());
   for (int i = 0; i < k.size(); i++) {
-    // x[i] = k[i].reveal<bool>(); // normal order
-    x[k.size()-i-1] = k[i].reveal<bool>(); // reverse order
+    x[i] = k[i].reveal<bool>(); // normal order
+    //x[k.size()-i-1] = k[i].reveal<bool>(); // reverse order
   }
 
     std::vector<unsigned char> buffer((x.size()) / 8, 0); // Pad with zeros
@@ -218,7 +262,8 @@ string textualize(Integer k) {
           if (c >= 32 && c <= 126) { // Printable ASCII range
               result += c;
           } else {
-              result += '.'; // Non-printable character placeholder
+            result += "." + std::to_string(c);
+            //  result += '.'; // Non-printable character placeholder
           }
       }
       return result;
@@ -227,6 +272,11 @@ string textualize(Integer k) {
       return std::string(buffer.begin(), buffer.end());
     }
 
+}
+
+string textualizeSub(SecureSubmission sub) {
+  return std::to_string(sub.day_since_2000.reveal<uint32_t>()) + "/" +
+    textualize(sub.party1) + "/" + textualize(sub.party2);
 }
 
 int parser_run(int party) {
@@ -246,9 +296,30 @@ int parser_run(int party) {
           secureSubmissions.push_back(SecureSubmission(subA[i], subB[i]));
         }
 
+        cout << "Secure submissions PRE-printout:" << endl;
+        size_t printed2 = 0;
+
+        for(const auto& sub : secureSubmissions) {
+          printed2++;
+
+          cout <<
+          " settlement_key: " << textualizeSub(sub) <<
+          " amount: " << sub.amount.reveal<uint64_t>() << 
+          " year: " << sub.year_since_2000.reveal<uint64_t>() <<
+          " dup: " << sub.dup.reveal<bool>() <<
+          endl;
+
+          if(printed2 > 10) {
+            cout << "snip..." << endl;
+            break;
+          }
+        }
+
+
+
         vec_based::sort<SecureSubmission, SecureSubmission>(
           &(secureSubmissions), nullptr, false,
-          &(bit_sort_by_amount));
+          &(bit_sort_by_settlement_key));
 
         auto last = secureSubmissions[0];
 
@@ -270,7 +341,7 @@ int parser_run(int party) {
         }
 
         vector<Integer> yearly;
-        vector<uint8_t> yearlyBounds = {0, 118, 119, 120, 121, 122, 123, 124};
+        vector<uint8_t> yearlyBounds = {0, 18, 19, 20, 21, 22, 23, 24};
 
         for(size_t i = 0; i < yearlyBounds.size(); i++) {
           yearly.push_back(Integer(32, 0, PUBLIC));
@@ -291,8 +362,8 @@ int parser_run(int party) {
 
           for(size_t i = 0; i < yearlyBounds.size()-1; i++) {            
             auto sel = (!sub.dup) &
-              (sub.year_since_1900 >= Integer(8, yearlyBounds[i], PUBLIC)) &
-              (sub.year_since_1900 < Integer(8, yearlyBounds[i + 1], PUBLIC));
+              (sub.year_since_2000 >= Integer(8, yearlyBounds[i], PUBLIC)) &
+              (sub.year_since_2000 < Integer(8, yearlyBounds[i + 1], PUBLIC));
  
             yearly[i] = yearly[i] + zero.select(sel, one);
           }
@@ -311,8 +382,8 @@ int parser_run(int party) {
 
         cout << "Yearly:" << endl;
         for(size_t i = 0; i < yearly.size()-1; i++) {
-          cout << (uint64_t) yearlyBounds[i] + 1900 << " - " <<
-           (uint64_t) yearlyBounds[i + 1] + 1900 << ": " <<
+          cout << (uint64_t) yearlyBounds[i] + 2000 << " - " <<
+           (uint64_t) yearlyBounds[i + 1] + 2000 << ": " <<
            yearly[i].reveal<uint64_t>() << endl;
         }
 
@@ -323,9 +394,9 @@ int parser_run(int party) {
           printed++;
 
           cout <<
-          " settlement_key: " << textualize(sub.settlement_key) <<
+          " settlement_key: " << textualizeSub(sub) <<
           " amount: " << sub.amount.reveal<uint64_t>() << 
-          " year: " << sub.year_since_1900.reveal<uint64_t>() <<
+          " year: " << sub.year_since_2000.reveal<uint64_t>() <<
           " dup: " << sub.dup.reveal<bool>() <<
           endl;
 

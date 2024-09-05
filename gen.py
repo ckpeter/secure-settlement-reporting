@@ -5,12 +5,13 @@ from datetime import datetime, timedelta
 
 # Configurable parameters
 SETTLEMENT_KEY_WIDTH = 60
+PARTY_WIDTH = 40
 SUBMITTER_WIDTH = 20
 YEARS_BACK_MIN = 1
-YEARS_BACK_MAX = 25
+YEARS_BACK_MAX = 20 # n.b. script does not handle negative well before 2000
 AMOUNT_MIN = 1000
 AMOUNT_MAX = 5000
-NUM_RECORDS = 5
+NUM_RECORDS = 10
 BASE_NAMES = ["Alice", "Bob", "Carol", "Dave"]
 LAST_NAMES = ["Smith", "Johnson", "Lee", "Brown"]
 
@@ -74,11 +75,15 @@ def main():
     for i in range(NUM_RECORDS):
         date_generated = generate_date()
         signature_date = date_generated.strftime('%Y%m%d')
-        year_since_1900 = date_generated.year - 1900
-        party1 = generate_name(i)
-        party2 = generate_name(i + NUM_RECORDS)
+        year_since_2000 = date_generated.year - 2000        
+        day_since_2000 = (date_generated - datetime(2000, 1, 1)).days
+        parties = [generate_name(i), generate_name(i + NUM_RECORDS)]
+        parties.sort()
+        party1 = fixed_length(parties[0], PARTY_WIDTH)
+        party2 = fixed_length(parties[1], PARTY_WIDTH)
         amount = generate_amount()
         secret = generate_secret()
+
         settlement_key = fixed_length("/".join([signature_date, party1, party2]),
                                       SETTLEMENT_KEY_WIDTH)
         
@@ -96,9 +101,11 @@ def main():
         for submit_party in [party1, party2]:
           submitter = fixed_length(submit_party, SUBMITTER_WIDTH)
           original_submissions.append([
-              settlement_key,
+              day_since_2000,
+              party1,
+              party2,
               amount,
-              year_since_1900,
+              year_since_2000,
               signature_date,
               submitter,
               commitment_token,
@@ -107,9 +114,13 @@ def main():
           ])        
         
           submissions.append([
-              to_bit_string(settlement_key, SETTLEMENT_KEY_WIDTH*8),
+              to_bit_string(day_since_2000, 16, True),
+
+              to_bit_string(party1, PARTY_WIDTH*8),
+              to_bit_string(party2, PARTY_WIDTH*8),
+
               to_bit_string(amount, 32, True),
-              to_bit_string(year_since_1900, 8, True),
+              to_bit_string(year_since_2000, 8, True),
               to_bit_string(signature_date, 64),
               to_bit_string(submitter, SUBMITTER_WIDTH*8),
               to_bit_string(commitment_token, 256),
