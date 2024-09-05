@@ -8,12 +8,14 @@ SETTLEMENT_KEY_WIDTH = 60
 PARTY_WIDTH = 40
 SUBMITTER_WIDTH = 20
 YEARS_BACK_MIN = 1
-YEARS_BACK_MAX = 20 # n.b. script does not handle negative well before 2000
+YEARS_BACK_MAX = 9 # n.b. script does not handle negative well before 2000
 AMOUNT_MIN = 1000
 AMOUNT_MAX = 5000
-NUM_RECORDS = 10
+NUM_RECORDS = 3
 BASE_NAMES = ["Alice", "Bob", "Carol", "Dave"]
 LAST_NAMES = ["Smith", "Johnson", "Lee", "Brown"]
+GEN_NAMES = []
+GEN_REPEATED = True
 
 def generate_date():
     today = datetime.now()
@@ -26,7 +28,9 @@ def generate_date():
 def generate_name(index):
     first_name = random.choice(BASE_NAMES) + str(random.randint(1, 999))
     last_name = random.choice(LAST_NAMES) + str(random.randint(1, 999))
-    return f"{first_name}{index} {last_name}{index}"
+    name = f"{first_name}{index} {last_name}{index}"
+    GEN_NAMES.append(name)
+    return name
 
 def generate_amount():
     return random.randint(AMOUNT_MIN, AMOUNT_MAX)
@@ -77,7 +81,9 @@ def main():
         signature_date = date_generated.strftime('%Y%m%d')
         year_since_2000 = date_generated.year - 2000        
         day_since_2000 = (date_generated - datetime(2000, 1, 1)).days
-        parties = [generate_name(i), generate_name(i + NUM_RECORDS)]
+        parties = [generate_name(i), 
+                   GEN_NAMES[0] if (GEN_REPEATED and i >= 1 and i <= 2) else
+                       generate_name(i + NUM_RECORDS)]
         parties.sort()
         party1 = fixed_length(parties[0], PARTY_WIDTH)
         party2 = fixed_length(parties[1], PARTY_WIDTH)

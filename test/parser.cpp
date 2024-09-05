@@ -168,6 +168,30 @@ template <size_t size> Integer makeInteger(const bitset<size>& bits, int party) 
   return Integer(secureBits);
 }
 
+class SecureParty : public Swappable<SecureParty> {
+public:
+  Integer name;
+  Integer count;
+
+  SecureParty(Integer name, Integer count=Integer(32, 0, PUBLIC)) {
+    this->name = name;
+    this->count = count;
+  }
+
+  SecureParty select(const Bit & sel, const SecureParty& rhs) const {
+    SecureParty nval(
+      this->name.select(sel, rhs.name),
+      this->count.select(sel, rhs.count)
+      );
+
+    return nval;
+  }
+
+  Bit bit_equal(const SecureParty& rhs) const {
+    return (this->name == rhs.name);
+  }
+};
+
 class SecureSubmission : public Swappable<SecureSubmission> {
 public:
   // Integer settlement_key;
@@ -246,6 +270,10 @@ Bit bit_sort_by_settlement_key(SecureSubmission a, SecureSubmission b) {
   return val;
 }
 
+Bit bit_sort_by_name(SecureParty a, SecureParty b) {
+  return a.name < b.name;
+}
+
 string textualize(Integer k) {
   boost::dynamic_bitset<> x(k.size());
   for (int i = 0; i < k.size(); i++) {
@@ -279,10 +307,49 @@ string textualizeSub(SecureSubmission sub) {
     textualize(sub.party1) + "/" + textualize(sub.party2);
 }
 
-int parser_run(int party) {
+void printSS(vector<SecureSubmission> secureSubmissions) {
+  cout << "Secure submissions printout:" << endl;
+  size_t printed = 0;
+
+  for(const auto& sub : secureSubmissions) {
+    cout <<
+    " " << textualizeSub(sub) <<
+    " $" << sub.amount.reveal<uint64_t>() << 
+    " @Y" << sub.year_since_2000.reveal<uint64_t>() <<
+    " dup: " << sub.dup.reveal<bool>() <<
+    endl;
+
+    printed++;
+
+    if(printed > 10) {
+      cout << "snip..." << endl;
+      break;
+    }
+  }
+}
+
+void printParties(vector<SecureParty> secureParties) {
+  cout << "Secure parties printout:" << endl;
+  size_t printed = 0;
+
+  for(const auto& party : secureParties) {
+    cout << " " << textualize(party.name) << " count: " << party.count.reveal<uint32_t>() << endl;
+    printed++;
+
+    if(printed > 10) {
+      cout << "snip..." << endl;
+      break;
+    }
+  }
+}
+
+
+int parser_run(int party, string prefix) {
+    cout << "Using data from prefix: " << prefix << endl;
+
     // These files MUST be of the exact same size, line count, and format.
-    string fileA = "submission_bits_a.txt";
-    string fileB = "submission_bits_b.txt";
+    string fileA = prefix + "/submission_bits_a.txt";
+    string fileB = prefix + "/submission_bits_b.txt";
 
     string file = party == ALICE ? fileA : fileB;
 
@@ -296,27 +363,6 @@ int parser_run(int party) {
           secureSubmissions.push_back(SecureSubmission(subA[i], subB[i]));
         }
 
-        cout << "Secure submissions PRE-printout:" << endl;
-        size_t printed2 = 0;
-
-        for(const auto& sub : secureSubmissions) {
-          printed2++;
-
-          cout <<
-          " settlement_key: " << textualizeSub(sub) <<
-          " amount: " << sub.amount.reveal<uint64_t>() << 
-          " year: " << sub.year_since_2000.reveal<uint64_t>() <<
-          " dup: " << sub.dup.reveal<bool>() <<
-          endl;
-
-          if(printed2 > 10) {
-            cout << "snip..." << endl;
-            break;
-          }
-        }
-
-
-
         vec_based::sort<SecureSubmission, SecureSubmission>(
           &(secureSubmissions), nullptr, false,
           &(bit_sort_by_settlement_key));
@@ -328,10 +374,50 @@ int parser_run(int party) {
           last = secureSubmissions[i];
         }
 
-        Integer sum = Integer(32, 0, PUBLIC);
-        Integer count = Integer(32, 0, PUBLIC);
+        // Gather parties
+        vector<SecureParty> secureParties;
+
+        for (size_t i = 0; i < secureSubmissions.size(); ++i) {
+          secureParties.push_back(SecureParty(secureSubmissions[i].party1));
+          secureParties.push_back(SecureParty(secureSubmissions[i].party2));
+        }
+
+        vec_based::sort<SecureParty, SecureParty>(
+          &(secureParties), nullptr, false,
+          &(bit_sort_by_name));
+
+        auto lastParty = secureParties[0];
+
         Integer zero = Integer(32, 0, PUBLIC);
         Integer one = Integer(32, 1, PUBLIC);
+
+        lastParty = secureParties[0];
+        Integer dupCount = Integer(32, 0, PUBLIC);
+
+        for (size_t i = 1; i < secureParties.size(); i++) {
+          Bit dup = secureParties[i].bit_equal(lastParty);
+          dupCount = zero.select(dup, dupCount);
+
+          secureParties[i].count = dupCount;
+
+          dupCount = dupCount + one;
+          lastParty = secureParties[i];
+        }
+
+        // printParties(secureParties);
+
+        // print out repeated parties
+        uint32_t threshold = 3;
+
+        for(const auto& party : secureParties) {
+          if(party.count.reveal<uint32_t>() >= threshold) {
+            cout << "Repeated party: " << textualize(party.name) << " count: " << party.count.reveal<uint32_t>() << endl;
+          }
+        }
+
+        // Gather statistics
+        Integer sum = Integer(32, 0, PUBLIC);
+        Integer count = Integer(32, 0, PUBLIC);
 
         vector<Integer> histogram;
         vector<uint64_t> histogramBounds = {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000};
@@ -371,9 +457,9 @@ int parser_run(int party) {
 
         Integer average = sum / count;
 
-        cout << "The sum is " << sum.reveal<uint64_t>() << endl;
-        cout << "The count is " << count.reveal<uint64_t>() << endl;
-        cout << "The average is " << average.reveal<uint64_t>() << endl;
+        cout << "The sum is $" << sum.reveal<uint64_t>();
+        cout << ", count is " << count.reveal<uint64_t>();
+        cout << ", and average is $" << average.reveal<uint64_t>() << endl;
 
         cout << "Histogram:" << endl;
         for(size_t i = 0; i < histogram.size()-1; i++) {
@@ -387,24 +473,7 @@ int parser_run(int party) {
            yearly[i].reveal<uint64_t>() << endl;
         }
 
-        cout << "Secure submissions printout:" << endl;
-        size_t printed = 0;
-
-        for(const auto& sub : secureSubmissions) {
-          printed++;
-
-          cout <<
-          " settlement_key: " << textualizeSub(sub) <<
-          " amount: " << sub.amount.reveal<uint64_t>() << 
-          " year: " << sub.year_since_2000.reveal<uint64_t>() <<
-          " dup: " << sub.dup.reveal<bool>() <<
-          endl;
-
-          if(printed > 10) {
-            cout << "snip..." << endl;
-            break;
-          }
-        }
+        printSS(secureSubmissions);
 
     } catch (const exception& e) {
         cerr << "Exception occurred: " << e.what() << endl;

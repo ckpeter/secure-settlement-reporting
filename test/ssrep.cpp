@@ -21,20 +21,21 @@ void mpc_run() {
 }
 
 int main(int argc, char** argv) {
-  if(argc < 2) {
-    cerr << "You need to pass in party!\n" <<
-    "Usage: prog alice_1_or_bob_2 [port=9999] [addr=127.0.0.1]" << endl;
+  if(argc < 3) {
+    cerr << "You need to pass in party and data dir prefix!\n" <<
+    "Usage: prog alice_1_or_bob_2 data_dir [port=9999] [addr=127.0.0.1]" << endl;
     exit(1);
   }
 
   int party = atoi(argv[1]);
+  string prefix = std::string(argv[2]);
   int port = 9999;
 
-  if(argc >= 3) {
-    port = atoi(argv[2]);
+  if(argc >= 4) {
+    port = atoi(argv[3]);
   }
 
-  const char* addr = argc >= 4 ? argv[3] : "127.0.0.1";
+  const char* addr = argc >= 5 ? argv[4] : "127.0.0.1";
   addr = party == ALICE ? nullptr : addr;
 
   if(addr == nullptr) {
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
   // ***** Run program logic
   cout << "\n===== Program running...\n";
   
-  parser_run(party);
+  parser_run(party, prefix);
   // mpc_run();
   
   cout << "\n===== Program completed ";  
