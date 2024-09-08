@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void secureReconstructSubmissions(vector<Submission>& subA,
+void xorReconstructSubmissions(vector<Submission>& subA,
                             vector<Submission>& subB,
                             vector<SecureSubmission>& secureSubmissions) {
   for (size_t i = 0; i < subA.size(); ++i) {
@@ -19,7 +19,7 @@ void secureReconstructSubmissions(vector<Submission>& subA,
   }
 }
 
-void markDuplicates(vector<SecureSubmission>& secureSubmissions) {
+void markDupSubmissions(vector<SecureSubmission>& secureSubmissions) {
   auto last = secureSubmissions[0];
 
   for (size_t i = 1; i < secureSubmissions.size(); ++i) {
@@ -136,13 +136,13 @@ int process_submissions(int party, string prefix) {
         yearly.push_back(Integer(32, 0, PUBLIC));
       }
 
-      secureReconstructSubmissions(subA, subB, secureSubmissions);
+      xorReconstructSubmissions(subA, subB, secureSubmissions);
 
       vec_based::sort<SecureSubmission, SecureSubmission>(
         &(secureSubmissions), nullptr, false,
         &(bit_sort_by_settlement_key));
 
-      markDuplicates(secureSubmissions);
+      markDupSubmissions(secureSubmissions);
       
       recordParties(secureSubmissions, secureParties);
       
