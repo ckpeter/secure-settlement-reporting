@@ -155,9 +155,6 @@ vector<Submission> xorSubmissions(const vector<Submission>& subsA, const vector<
     return result;
 }
 
-
-
-
 template <size_t size> Integer makeInteger(const bitset<size>& bits, int party) {
   vector<Bit> secureBits;
 
@@ -299,7 +296,6 @@ string textualize(Integer k) {
     } else {
       return std::string(buffer.begin(), buffer.end());
     }
-
 }
 
 string textualizeSub(SecureSubmission sub) {
@@ -307,7 +303,7 @@ string textualizeSub(SecureSubmission sub) {
     textualize(sub.party1) + "/" + textualize(sub.party2);
 }
 
-void printSS(vector<SecureSubmission> secureSubmissions) {
+void printSubmissions(vector<SecureSubmission> secureSubmissions) {
   cout << "Secure submissions printout:" << endl;
   size_t printed = 0;
 
@@ -341,146 +337,6 @@ void printParties(vector<SecureParty> secureParties) {
       break;
     }
   }
-}
-
-
-int parser_run(int party, string prefix) {
-    cout << "Using data from prefix: " << prefix << endl;
-
-    // These files MUST be of the exact same size, line count, and format.
-    string fileA = prefix + "/submission_bits_a.txt";
-    string fileB = prefix + "/submission_bits_b.txt";
-
-    string file = party == ALICE ? fileA : fileB;
-
-    try {
-        vector<Submission> subA = loadSubmissionsFromFile(file);
-        vector<Submission> subB = loadSubmissionsFromFile(file);
-
-        vector<SecureSubmission> secureSubmissions;
-
-        for (size_t i = 0; i < subA.size(); ++i) {
-          secureSubmissions.push_back(SecureSubmission(subA[i], subB[i]));
-        }
-
-        vec_based::sort<SecureSubmission, SecureSubmission>(
-          &(secureSubmissions), nullptr, false,
-          &(bit_sort_by_settlement_key));
-
-        auto last = secureSubmissions[0];
-
-        for (size_t i = 1; i < subA.size(); ++i) {
-          secureSubmissions[i].dup = last.bit_equal(secureSubmissions[i]);
-          last = secureSubmissions[i];
-        }
-
-        // Gather parties
-        vector<SecureParty> secureParties;
-
-        for (size_t i = 0; i < secureSubmissions.size(); ++i) {
-          secureParties.push_back(SecureParty(secureSubmissions[i].party1));
-          secureParties.push_back(SecureParty(secureSubmissions[i].party2));
-        }
-
-        vec_based::sort<SecureParty, SecureParty>(
-          &(secureParties), nullptr, false,
-          &(bit_sort_by_name));
-
-        auto lastParty = secureParties[0];
-
-        Integer zero = Integer(32, 0, PUBLIC);
-        Integer one = Integer(32, 1, PUBLIC);
-
-        lastParty = secureParties[0];
-        Integer dupCount = Integer(32, 0, PUBLIC);
-
-        for (size_t i = 1; i < secureParties.size(); i++) {
-          Bit dup = secureParties[i].bit_equal(lastParty);
-          dupCount = zero.select(dup, dupCount);
-
-          secureParties[i].count = dupCount;
-
-          dupCount = dupCount + one;
-          lastParty = secureParties[i];
-        }
-
-        // printParties(secureParties);
-
-        // print out repeated parties
-        uint32_t threshold = 3;
-
-        for(const auto& party : secureParties) {
-          if(party.count.reveal<uint32_t>() >= threshold) {
-            cout << "Repeated party: " << textualize(party.name) << " count: " << party.count.reveal<uint32_t>() << endl;
-          }
-        }
-
-        // Gather statistics
-        Integer sum = Integer(32, 0, PUBLIC);
-        Integer count = Integer(32, 0, PUBLIC);
-
-        vector<Integer> histogram;
-        vector<uint64_t> histogramBounds = {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000};
-
-        for(size_t i = 0; i < histogramBounds.size(); i++) {
-          histogram.push_back(Integer(32, 0, PUBLIC));
-        }
-
-        vector<Integer> yearly;
-        vector<uint8_t> yearlyBounds = {0, 18, 19, 20, 21, 22, 23, 24};
-
-        for(size_t i = 0; i < yearlyBounds.size(); i++) {
-          yearly.push_back(Integer(32, 0, PUBLIC));
-        }
-
-        for (const auto& sub : secureSubmissions) {
-          auto val = sub.amount.select(sub.dup, zero);          
-          sum = sum + val;
-          count = count + one.select(sub.dup, zero);
-
-          for(size_t i = 0; i < histogramBounds.size()-1; i++) {
-            auto sel = (!sub.dup) &
-              (val >= Integer(32, histogramBounds[i], PUBLIC)) &
-              (val < Integer(32, histogramBounds[i + 1], PUBLIC));
-
-            histogram[i] = histogram[i] + zero.select(sel, one);
-          }
-
-          for(size_t i = 0; i < yearlyBounds.size()-1; i++) {            
-            auto sel = (!sub.dup) &
-              (sub.year_since_2000 >= Integer(8, yearlyBounds[i], PUBLIC)) &
-              (sub.year_since_2000 < Integer(8, yearlyBounds[i + 1], PUBLIC));
- 
-            yearly[i] = yearly[i] + zero.select(sel, one);
-          }
-        }
-
-        Integer average = sum / count;
-
-        cout << "The sum is $" << sum.reveal<uint64_t>();
-        cout << ", count is " << count.reveal<uint64_t>();
-        cout << ", and average is $" << average.reveal<uint64_t>() << endl;
-
-        cout << "Histogram:" << endl;
-        for(size_t i = 0; i < histogram.size()-1; i++) {
-          cout << histogramBounds[i] << " - " << histogramBounds[i + 1] << ": " << histogram[i].reveal<uint64_t>() << endl;
-        }
-
-        cout << "Yearly:" << endl;
-        for(size_t i = 0; i < yearly.size()-1; i++) {
-          cout << (uint64_t) yearlyBounds[i] + 2000 << " - " <<
-           (uint64_t) yearlyBounds[i + 1] + 2000 << ": " <<
-           yearly[i].reveal<uint64_t>() << endl;
-        }
-
-        printSS(secureSubmissions);
-
-    } catch (const exception& e) {
-        cerr << "Exception occurred: " << e.what() << endl;
-        return 1;
-    }
-
-    return 0;
 }
 
 int xxmain(int argc, char* argv[]) {
