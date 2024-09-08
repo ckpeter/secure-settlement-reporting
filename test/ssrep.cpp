@@ -31,8 +31,9 @@ void markDuplicates(vector<SecureSubmission>& secureSubmissions) {
 void recordParties(vector<SecureSubmission>& secureSubmissions,
                     vector<SecureParty>& secureParties) {
   for (size_t i = 0; i < secureSubmissions.size(); ++i) {
-    secureParties.push_back(SecureParty(secureSubmissions[i].party1));
-    secureParties.push_back(SecureParty(secureSubmissions[i].party2));
+    auto sub = secureSubmissions[i];
+    secureParties.push_back(SecureParty(sub.party1, sub.dup));
+    secureParties.push_back(SecureParty(sub.party2, sub.dup));
   }
 }
 
@@ -41,34 +42,34 @@ void markRepeatParties(vector<SecureParty>& secureParties) {
     &(secureParties), nullptr, false,
     &(bit_sort_by_name));
 
-  auto lastParty = secureParties[0];
+  auto& last = secureParties[0];
 
   Integer zero = Integer(32, 0, PUBLIC);
   Integer one = Integer(32, 1, PUBLIC);
 
-  lastParty = secureParties[0];
   Integer dupCount = Integer(32, 0, PUBLIC);
 
   for (size_t i = 1; i < secureParties.size(); i++) {
-    Bit dup = secureParties[i].bit_equal(lastParty);
+    Bit dup = secureParties[i].bit_equal(last);
     dupCount = zero.select(dup, dupCount);
 
-    secureParties[i].count = dupCount;
+    secureParties[i].additional = dupCount;
 
-    dupCount = dupCount + one;
-    lastParty = secureParties[i];
+    dupCount = dupCount + one.select(secureParties[i].invalid, zero);
+    last = secureParties[i];
   } 
 }
 
 void unmaskRepeatParties(vector<SecureParty>& secureParties,
                           map<string, uint32_t>& repeatedParties) {
-  uint32_t threshold = 3;
+  uint32_t repeatThreshold = 2; // How many additional to unmask
 
   for(const auto& party : secureParties) {
-    if(party.count.reveal<uint32_t>() >= threshold) {
+    if(party.additional.reveal<uint32_t>() >= repeatThreshold &&
+      !party.invalid.reveal<bool>()) {
       auto old = repeatedParties.find(textualize(party.name));
       auto oldCount = old == repeatedParties.end() ? 0 : old->second;
-      auto newCount = party.count.reveal<uint32_t>();
+      auto newCount = party.additional.reveal<uint32_t>();
       repeatedParties[textualize(party.name)] = oldCount < newCount ? newCount : oldCount;
     }
   }
@@ -153,6 +154,7 @@ int process_submissions(int party, string prefix) {
                         yearly, yearlyBounds, secureSubmissions);
 
       printSubmissions(secureSubmissions);
+      printParties(secureParties);
 
       Integer average = sum / count;
 
@@ -174,7 +176,7 @@ int process_submissions(int party, string prefix) {
       }
 
       for(const auto& party : repeatedParties) {
-        cout << "Repeat party: " << party.first << " count: " <<
+        cout << "* Repeat party: " << party.first << " count: " <<
           party.second << endl;
       }
   } catch (const exception& e) {

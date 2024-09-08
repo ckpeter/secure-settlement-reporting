@@ -168,17 +168,20 @@ template <size_t size> Integer makeInteger(const bitset<size>& bits, int party) 
 class SecureParty : public Swappable<SecureParty> {
 public:
   Integer name;
-  Integer count;
+  Bit invalid;
+  Integer additional;
 
-  SecureParty(Integer name, Integer count=Integer(32, 0, PUBLIC)) {
+  SecureParty(Integer name, Bit invalid, Integer additional=Integer(32, 0, PUBLIC)) {
     this->name = name;
-    this->count = count;
+    this->invalid = invalid;
+    this->additional = additional;
   }
 
   SecureParty select(const Bit & sel, const SecureParty& rhs) const {
     SecureParty nval(
       this->name.select(sel, rhs.name),
-      this->count.select(sel, rhs.count)
+      this->invalid.select(sel, rhs.invalid),
+      this->additional.select(sel, rhs.additional)
       );
 
     return nval;
@@ -329,7 +332,10 @@ void printParties(vector<SecureParty> secureParties) {
   size_t printed = 0;
 
   for(const auto& party : secureParties) {
-    cout << " " << textualize(party.name) << " count: " << party.count.reveal<uint32_t>() << endl;
+    cout << " " << textualize(party.name)
+      << " additional: " << party.additional.reveal<uint32_t>()
+      << " invalid: " << party.invalid.reveal<bool>() << endl;
+
     printed++;
 
     if(printed > 10) {
