@@ -265,7 +265,6 @@ public:
 
   SecureSubmission select(const Bit & sel, const SecureSubmission& rhs) const {
     SecureSubmission nval(
-      // this->settlement_key.select(sel, rhs.settlement_key),
       this->day_since_2000.select(sel, rhs.day_since_2000),
       this->party1.select(sel, rhs.party1),
       this->party2.select(sel, rhs.party2),
@@ -279,7 +278,7 @@ public:
   }
 
   Bit bit_equal(const SecureSubmission& rhs) const {
-    return // (this->settlement_key == rhs.settlement_key) &
+    return
       (this->day_since_2000 == rhs.day_since_2000) &
       (this->party1 == rhs.party1) &
       (this->party2 == rhs.party2) &
