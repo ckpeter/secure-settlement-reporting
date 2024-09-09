@@ -240,10 +240,12 @@ public:
   Integer amount;
   Integer year_since_2000;
   Integer signature_date;
+  Integer commitment_token;
   Bit dup;
 
   SecureSubmission(Integer day_since_2000, Integer party1, Integer party2,
-                   Integer amount, Integer year_since_2000, Integer signature_date) {
+                   Integer amount, Integer year_since_2000, Integer signature_date,
+                   Integer commitment_token) {
     this->day_since_2000 = day_since_2000;
     this->party1 = party1;
     this->party2 = party2;
@@ -251,6 +253,7 @@ public:
     this->amount = amount;
     this->year_since_2000 = year_since_2000;
     this->signature_date = signature_date;
+    this->commitment_token = commitment_token;
   }
 
   SecureSubmission(Submission a, Submission b) {
@@ -261,6 +264,7 @@ public:
     this->amount = makeInteger(a.amount, ALICE) ^ makeInteger(b.amount, BOB);
     this->year_since_2000 = makeInteger(a.year_since_2000, ALICE) ^ makeInteger(b.year_since_2000, BOB);
     this->signature_date = makeInteger(a.signature_date, ALICE) ^ makeInteger(b.signature_date, BOB);
+    this->commitment_token = makeInteger(a.commitment_token, ALICE) ^ makeInteger(b.commitment_token, BOB);
   }
 
   SecureSubmission select(const Bit & sel, const SecureSubmission& rhs) const {
@@ -271,7 +275,8 @@ public:
 
       this->amount.select(sel, rhs.amount),
       this->year_since_2000.select(sel, rhs.year_since_2000),
-      this->signature_date.select(sel, rhs.signature_date)
+      this->signature_date.select(sel, rhs.signature_date),
+      this->commitment_token.select(sel, rhs.commitment_token)
       );
 
     return nval;
@@ -284,7 +289,8 @@ public:
       (this->party2 == rhs.party2) &
       (this->amount == rhs.amount) &
       (this->year_since_2000 == rhs.year_since_2000) &
-      (this->signature_date == rhs.signature_date);
+      (this->signature_date == rhs.signature_date) & 
+      (this->commitment_token == rhs.commitment_token);
   }
 };
 
@@ -325,6 +331,7 @@ void printSubmissions(vector<SecureSubmission> secureSubmissions) {
     " $" << sub.amount.reveal<uint64_t>() << 
     " @Y" << sub.year_since_2000.reveal<uint64_t>() <<
     " dup: " << sub.dup.reveal<bool>() <<
+    " token: " << textualize(sub.commitment_token) <<
     endl;
 
     printed++;

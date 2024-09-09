@@ -106,6 +106,14 @@ void recordStatistics(Integer& sum, Integer& count,
   }
 }
 
+void recordCommitmentTokens(vector<SecureSubmission>& secureSubmissions,
+                            vector<string>& commitment_tokens) {
+  for (const auto& sub : secureSubmissions) {
+    string s = textualize(sub.commitment_token);
+    commitment_tokens.push_back(s);
+  }
+}
+
 int process_submissions(int party, string prefix) {
   Integer zero = Integer(32, 0, PUBLIC);
   Integer one = Integer(32, 1, PUBLIC);
@@ -123,6 +131,8 @@ int process_submissions(int party, string prefix) {
       vector<SecureSubmission> secureSubmissions;
       vector<SecureParty> secureParties;
       map<string, uint32_t> repeatedParties;
+      vector<string> commitment_tokens;
+
       Integer sum = Integer(32, 0, PUBLIC);
       Integer count = Integer(32, 0, PUBLIC);
       vector<Integer> histogram;
@@ -145,12 +155,6 @@ int process_submissions(int party, string prefix) {
       markDupSubmissions(secureSubmissions);
       
       recordParties(secureSubmissions, secureParties);
-
-      if(false) {
-        //printSubmissions(secureSubmissions);
-        //printParties(secureParties);
-        return 0;;
-      }
       
       markRepeatParties(secureParties);
       
@@ -158,6 +162,8 @@ int process_submissions(int party, string prefix) {
 
       recordStatistics(sum, count, histogram, histogramBounds,
                         yearly, yearlyBounds, secureSubmissions);
+
+      recordCommitmentTokens(secureSubmissions, commitment_tokens);
 
       printSubmissions(secureSubmissions);
       printParties(secureParties);
@@ -168,6 +174,19 @@ int process_submissions(int party, string prefix) {
             << ", the sum amount is $" << sum.reveal<uint64_t>()
             << ", and average is $" << average.reveal<uint64_t>() << endl;
 
+
+      cout << "Commitment token samples: ";
+
+      for(size_t i = 0; i < 3; i++) {
+        if(i >= commitment_tokens.size()) {
+          break;
+        }
+
+        cout << commitment_tokens[i] << " ";
+      }
+
+      cout << endl;
+      
       cout << "Histogram:" << endl;
       for(size_t i = 0; i < histogram.size()-1; i++) {
         cout << histogramBounds[i] << " - " << histogramBounds[i + 1] << 

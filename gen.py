@@ -109,7 +109,10 @@ def main():
 
         
         if True:
-          # HACK: chop these hashes in half so that the value to process is 256 bit
+          # HACK: since hashes are now in hex, 256 bit = 512 bits long.
+          # Therefore, chop them in half so that bits to output is 256 bits.
+          # Later can have them output in raw bytes/bites instead of hex,
+          # with no change to the MPC program.
           commitment_token = fixed_length(commitment_token, 32)
           secret_hash = fixed_length(secret_hash, 32)
           secret = fixed_length(secret, 16)
