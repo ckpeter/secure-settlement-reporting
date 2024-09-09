@@ -9,6 +9,8 @@
 
 #include "parser.cpp"
 
+#define UNMASK_REPEAT_THRESHOLD 2 // 2 means party has 3+ settlements (repeating 2+ times)
+
 using namespace std;
 
 void xorReconstructSubmissions(vector<Submission>& subA,
@@ -62,10 +64,9 @@ void markRepeatParties(vector<SecureParty>& secureParties) {
 
 void unmaskRepeatParties(vector<SecureParty>& secureParties,
                           map<string, uint32_t>& repeatedParties) {
-  uint32_t repeatThreshold = 2; // How many additional to unmask
 
   for(const auto& party : secureParties) {
-    if(party.additional.reveal<uint32_t>() >= repeatThreshold &&
+    if(party.additional.reveal<uint32_t>() >= UNMASK_REPEAT_THRESHOLD &&
       !party.invalid.reveal<bool>()) {
       auto old = repeatedParties.find(textualize(party.name));
       auto oldCount = old == repeatedParties.end() ? 0 : old->second;
@@ -180,9 +181,10 @@ int process_submissions(int party, string prefix) {
           yearly[i].reveal<uint64_t>() << endl;
       }
 
+      cout << "Repeated parties settled >= " << (UNMASK_REPEAT_THRESHOLD + 1) << endl;
       for(const auto& party : repeatedParties) {
-        cout << "* Repeat party: " << party.first << " count: " <<
-          party.second << endl;
+        cout << "* Repeat party: " << party.first << " settlements: " <<
+          party.second + 1 << endl;
       }
   } catch (const exception& e) {
       cerr << "Exception occurred: " << e.what() << endl;

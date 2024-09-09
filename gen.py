@@ -1,6 +1,7 @@
 import random
 import hashlib
 import csv
+import sys
 from datetime import datetime, timedelta
 
 # Configurable parameters
@@ -11,7 +12,7 @@ YEARS_BACK_MIN = 1
 YEARS_BACK_MAX = 9 # n.b. script does not handle negative well before 2000
 AMOUNT_MIN = 1000
 AMOUNT_MAX = 5000
-NUM_RECORDS = 3
+NUM_RECORDS = int(sys.argv[1]) if len(sys.argv) >= 2 else 5
 BASE_NAMES = ["Alice", "Bob", "Carol", "Dave"]
 LAST_NAMES = ["Smith", "Johnson", "Lee", "Brown"]
 GEN_NAMES = []
@@ -72,6 +73,18 @@ def fixed_length(s, desired_length):
     else:
         return s
         
+
+# Generate up to 3 repeating parties with varying repeating counts
+def gen_or_repeat_party(index):
+    if GEN_REPEATED and index >= 2 and index <= 3: # repeat 2 additional times
+        return GEN_NAMES[0]
+    elif GEN_REPEATED and index >= 6 and index <= 8: # repeat 3 additional times
+        return GEN_NAMES[5]
+    elif GEN_REPEATED and index >= 12 and index <= 15: # repeat 4 additional times
+        return GEN_NAMES[9]
+    else:
+        return generate_name(index)
+    
 def main():
     original_submissions = []
     submissions = []
@@ -81,9 +94,7 @@ def main():
         signature_date = date_generated.strftime('%Y%m%d')
         year_since_2000 = date_generated.year - 2000        
         day_since_2000 = (date_generated - datetime(2000, 1, 1)).days
-        parties = [generate_name(i), 
-                   GEN_NAMES[0] if (GEN_REPEATED and i >= 1 and i <= 2) else
-                       generate_name(i + NUM_RECORDS)]
+        parties = [generate_name(i), gen_or_repeat_party(i)]
         parties.sort()
         party1 = fixed_length(parties[0], PARTY_WIDTH)
         party2 = fixed_length(parties[1], PARTY_WIDTH)
@@ -95,7 +106,7 @@ def main():
         
         commitment_token = hash_value(settlement_key + party1 + secret)        
         secret_hash = hash_value(secret)
-        
+
         
         if True:
           # HACK: chop these hashes in half so that the value to process is 256 bit
@@ -111,8 +122,7 @@ def main():
               party1,
               party2,
               amount,
-              year_since_2000,
-              signature_date,
+              year_since_2000,              signature_date,
               submitter,
               commitment_token,
               secret_hash,
@@ -152,6 +162,8 @@ def main():
             parts_a, parts_b = zip(*(xor_split(bit) for bit in submission))
             writer_a.writerow(parts_a)
             writer_b.writerow(parts_b)
+
+    print("Generated " + str(NUM_RECORDS) + " settlements");
 
     # Reconstitute and check
     with open('submission_bits_a.txt', 'r') as fa, \
