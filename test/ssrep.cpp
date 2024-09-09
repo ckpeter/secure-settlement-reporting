@@ -109,13 +109,12 @@ int process_submissions(int party, string prefix) {
   Integer zero = Integer(32, 0, PUBLIC);
   Integer one = Integer(32, 1, PUBLIC);
 
-  cout << "Using data from prefix: " << prefix << endl;
-
   // These files MUST be of the exact same size, line count, and format.
   string fileA = prefix + "/submission_bits_a.txt";
   string fileB = prefix + "/submission_bits_b.txt";
 
   string file = party == ALICE ? fileA : fileB;
+  cout << "Reading from file: " << file << endl;
 
   try {
       vector<Submission> subA = loadSubmissionsFromFile(file);
@@ -145,6 +144,12 @@ int process_submissions(int party, string prefix) {
       markDupSubmissions(secureSubmissions);
       
       recordParties(secureSubmissions, secureParties);
+
+      if(false) {
+        //printSubmissions(secureSubmissions);
+        //printParties(secureParties);
+        return 0;;
+      }
       
       markRepeatParties(secureParties);
       

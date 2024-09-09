@@ -18,9 +18,46 @@
 
 using namespace std;
 
+unsigned char reverseBits(unsigned char n) {
+    unsigned char result = 0;
+    for (int i = 0; i < 8; ++i) {
+        result <<= 1;           // Shift the result to the left
+        result |= (n & 1);      // Copy the least significant bit of n to the result
+        n >>= 1;                // Shift n to the right
+    }
+    return result;
+}
+
+string textualize(Integer k) {
+  boost::dynamic_bitset<> x(k.size());
+
+  for (int i = 0; i < k.size(); i++) {
+    x[i] = k[i].reveal<bool>(); // normal order
+  }  
+
+  std::string result;
+
+  for(size_t k = 0; k < x.size()/8; k++) {
+    std::bitset<8> byte;
+
+    for(size_t i = 0; i < 8; i++) {
+      byte[i] = x[k*8 + i];
+    }
+
+    unsigned char c = (unsigned char) byte.to_ulong();
+    c = reverseBits(c);    
+    result += c;
+  }
+
+  if(x.size() % 8 > 0) {
+    result += "?"; // partial byte rendered as unknown
+  }
+
+  return result;
+}
+
 class Submission {
 public:
-    // bitset<480> settlement_key;
     bitset<16> day_since_2000;
     bitset<320> party1;
     bitset<320> party2;
@@ -37,14 +74,15 @@ public:
         string field;
         Submission sub;
 
-        //if (!parseField(ss, field, 480)) throw runtime_error("Field error in 'settlement_key': " + errorDetails(field, 480));
-        //sub.settlement_key = bitset<480>(field);
-
         if (!parseField(ss, field, 16)) throw runtime_error("Field error in 'day_since_2000': " + errorDetails(field, 16));
         sub.day_since_2000 = bitset<16>(field);
+
         if (!parseField(ss, field, 320)) throw runtime_error("Field error in 'party1': " + errorDetails(field, 480));
+        reverse(field.begin(), field.end()); // reverse string to put into bitset
         sub.party1 = bitset<320>(field);
+        
         if (!parseField(ss, field, 320)) throw runtime_error("Field error in 'party2': " + errorDetails(field, 480));
+        reverse(field.begin(), field.end()); // reverse string to put into bitset
         sub.party2 = bitset<320>(field);
 
         if (!parseField(ss, field, 32)) throw runtime_error("Field error in 'amount': " + errorDetails(field, 32));
@@ -57,15 +95,19 @@ public:
         sub.signature_date = bitset<64>(field);
 
         if (!parseField(ss, field, 160)) throw runtime_error("Field error in 'submitter': " + errorDetails(field, 160));
+        reverse(field.begin(), field.end()); // reverse string to put into bitset
         sub.submitter = bitset<160>(field);
 
         if (!parseField(ss, field, 256)) throw runtime_error("Field error in 'commitment_token': " + errorDetails(field, 256));
+        reverse(field.begin(), field.end()); // reverse string to put into bitset
         sub.commitment_token = bitset<256>(field);
 
         if (!parseField(ss, field, 256)) throw runtime_error("Field error in 'secret_hash': " + errorDetails(field, 256));
+        reverse(field.begin(), field.end()); // reverse string to put into bitset
         sub.secret_hash = bitset<256>(field);
 
         if (!parseField(ss, field, 128)) throw runtime_error("Field error in 'secret': " + errorDetails(field, 128));
+        reverse(field.begin(), field.end()); // reverse string to put into bitset
         sub.secret = bitset<128>(field);
 
         return sub;
@@ -83,7 +125,6 @@ public:
     }
 
     void xorWith(const Submission& other) {
-        // settlement_key ^= other.settlement_key;
         day_since_2000 ^= other.day_since_2000;
         party1 ^= other.party1;
         party2 ^= other.party2;
@@ -98,8 +139,7 @@ public:
 
     string toString() const {
         stringstream ss;
-        ss //settlement_key.to_string().substr(480 - 480) << ','
-            << day_since_2000.to_string().substr(16 - 16) << ','
+        ss << day_since_2000.to_string().substr(16 - 16) << ','
             << party1.to_string().substr(480 - 480) << ','
             << party2.to_string().substr(480 - 480) << ','
            << amount.to_string().substr(32 - 32) << ','
@@ -194,7 +234,6 @@ public:
 
 class SecureSubmission : public Swappable<SecureSubmission> {
 public:
-  // Integer settlement_key;
   Integer day_since_2000;
   Integer party1;
   Integer party2;
@@ -203,8 +242,8 @@ public:
   Integer signature_date;
   Bit dup;
 
-  SecureSubmission(Integer day_since_2000, Integer party1, Integer party2, Integer amount, Integer year_since_2000, Integer signature_date) {
-    //this->settlement_key = settlement_key;
+  SecureSubmission(Integer day_since_2000, Integer party1, Integer party2,
+                   Integer amount, Integer year_since_2000, Integer signature_date) {
     this->day_since_2000 = day_since_2000;
     this->party1 = party1;
     this->party2 = party2;
@@ -215,7 +254,6 @@ public:
   }
 
   SecureSubmission(Submission a, Submission b) {
-    // this->settlement_key = makeInteger(a.settlement_key, ALICE) ^ makeInteger(b.settlement_key, BOB);
     this->day_since_2000 = makeInteger(a.day_since_2000, ALICE) ^ makeInteger(b.day_since_2000, BOB);
     this->party1 = makeInteger(a.party1, ALICE) ^ makeInteger(b.party1, BOB);
     this->party2 = makeInteger(a.party2, ALICE) ^ makeInteger(b.party2, BOB);
@@ -256,7 +294,6 @@ Bit bit_sort_by_amount(SecureSubmission a, SecureSubmission b) {
 }
 
 Bit bit_sort_by_settlement_key(SecureSubmission a, SecureSubmission b) {
-  //return a.settlement_key < b.settlement_key;
   Bit party2_val = a.party2 < b.party2;
   Bit party1_val = a.party1 < b.party1;
   Bit party1_eq = a.party1 == b.party1;
@@ -272,33 +309,6 @@ Bit bit_sort_by_settlement_key(SecureSubmission a, SecureSubmission b) {
 
 Bit bit_sort_by_name(SecureParty a, SecureParty b) {
   return a.name < b.name;
-}
-
-string textualize(Integer k) {
-  boost::dynamic_bitset<> x(k.size());
-  for (int i = 0; i < k.size(); i++) {
-    x[i] = k[i].reveal<bool>(); // normal order
-    //x[k.size()-i-1] = k[i].reveal<bool>(); // reverse order
-  }
-
-    std::vector<unsigned char> buffer((x.size()) / 8, 0); // Pad with zeros
-    boost::to_block_range(x, buffer.begin());
-
-    if(true) {
-      std::string result;
-      for (unsigned char c : buffer) {
-          if (c >= 32 && c <= 126) { // Printable ASCII range
-              result += c;
-          } else {
-            result += "." + std::to_string(c);
-            //  result += '.'; // Non-printable character placeholder
-          }
-      }
-      return result;
-
-    } else {
-      return std::string(buffer.begin(), buffer.end());
-    }
 }
 
 string textualizeSub(SecureSubmission sub) {
