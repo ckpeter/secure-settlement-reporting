@@ -76,7 +76,7 @@ void unmaskRepeatParties(vector<SecureParty>& secureParties,
   }
 }
 
-void recordStatistics(Integer& sum, Integer& count,
+void recordStatistics(Integer& sum64, Integer& count,
   vector<Integer>& histogram, vector<uint64_t>& histogramBounds,
   vector<Integer>& yearly, vector<uint8_t>& yearlyBounds,
   vector<SecureSubmission> secureSubmissions) {
@@ -84,9 +84,10 @@ void recordStatistics(Integer& sum, Integer& count,
   Integer one = Integer(32, 1, PUBLIC);
 
   for (const auto& sub : secureSubmissions) {
-    auto val = sub.amount.select(sub.dup, zero);          
-    sum = sum + val;
     count = count + one.select(sub.dup, zero);
+    auto val = sub.amount.select(sub.dup, zero);
+    val = val.resize(64);        
+    sum64 = sum64 + val;
 
     for(size_t i = 0; i < histogramBounds.size()-1; i++) {
       auto sel = (!sub.dup) &
@@ -133,7 +134,7 @@ int process_submissions(int party, string prefix) {
       map<string, uint32_t> repeatedParties;
       vector<string> commitment_tokens;
 
-      Integer sum = Integer(32, 0, PUBLIC);
+      Integer sum64 = Integer(64, 0, PUBLIC);
       Integer count = Integer(32, 0, PUBLIC);
       vector<Integer> histogram;
       vector<uint64_t> histogramBounds = {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000};
@@ -160,18 +161,21 @@ int process_submissions(int party, string prefix) {
       
       unmaskRepeatParties(secureParties, repeatedParties);
 
-      recordStatistics(sum, count, histogram, histogramBounds,
+      recordStatistics(sum64, count, histogram, histogramBounds,
                         yearly, yearlyBounds, secureSubmissions);
 
       recordCommitmentTokens(secureSubmissions, commitment_tokens);
 
-      printSubmissions(secureSubmissions);
-      printParties(secureParties);
+      if(false) {
+        printSubmissions(secureSubmissions);
+        printParties(secureParties);
+      }
 
-      Integer average = sum / count;
+      count.resize(64);
+      Integer average = sum64 / count;
 
       cout << "Total count of " << count.reveal<uint64_t>()
-            << ", the sum amount is $" << sum.reveal<uint64_t>()
+            << ", the sum amount is $" << sum64.reveal<uint64_t>()
             << ", and average is $" << average.reveal<uint64_t>() << endl;
 
 
