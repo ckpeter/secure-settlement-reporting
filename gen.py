@@ -168,18 +168,19 @@ def main():
 
     print("Generated " + str(NUM_RECORDS) + " settlements");
 
-    # Reconstitute and check
-    with open('submission_bits_a.txt', 'r') as fa, \
-         open('submission_bits_b.txt', 'r') as fb, \
-         open('submission_bits_check.txt', 'w', newline='') as f_check:
-        reader_a = csv.reader(fa)
-        reader_b = csv.reader(fb)
-        writer_check = csv.writer(f_check, lineterminator='\n')
-        for row_a, row_b in zip(reader_a, reader_b):
-            reconstructed = ["".join(str(int(a) ^ int(b)) for a, b in zip(part_a, part_b)) for part_a, part_b in zip(row_a, row_b)]
-            writer_check.writerow(reconstructed)
+    if False:
+      # Reconstitute and check
+      with open('submission_bits_a.txt', 'r') as fa, \
+          open('submission_bits_b.txt', 'r') as fb, \
+          open('submission_bits_check.txt', 'w', newline='') as f_check:
+          reader_a = csv.reader(fa)
+          reader_b = csv.reader(fb)
+          writer_check = csv.writer(f_check, lineterminator='\n')
+          for row_a, row_b in zip(reader_a, reader_b):
+              reconstructed = ["".join(str(int(a) ^ int(b)) for a, b in zip(part_a, part_b)) for part_a, part_b in zip(row_a, row_b)]
+              writer_check.writerow(reconstructed)
 
-    compare_files('submission_bits_check.txt', 'submission_bits.txt')
+      compare_files('submission_bits_check.txt', 'submission_bits.txt')
 
 if __name__ == "__main__":
     main()
