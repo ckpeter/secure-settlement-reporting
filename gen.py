@@ -85,6 +85,15 @@ def gen_or_repeat_party(index):
     else:
         return generate_name(index)
     
+def HACK_chop_value(s, target_len):    
+    # HACK: since hashes are currently in hex, 256 bit => 512 bits long,
+    # which is inefficient.
+    # Therefore, chop them in half so that bits to output is still 256 bits.
+    # In the future, when the code is improved to generate raw bytes,
+    # can have them output in full-length raw bytes instead of hex,
+    # with no change to the MPC program.
+    return fixed_length(s, target_len)
+    
 def main():
     original_submissions = []
     submissions = []
@@ -99,38 +108,40 @@ def main():
         party1 = fixed_length(parties[0], PARTY_WIDTH)
         party2 = fixed_length(parties[1], PARTY_WIDTH)
         amount = generate_amount()
-        secret = generate_secret()
 
         settlement_key = fixed_length("/".join([signature_date, party1, party2]),
-                                      SETTLEMENT_KEY_WIDTH)
-        
-        commitment_token = hash_value(settlement_key + party1 + secret)        
-        secret_hash = hash_value(secret)
-
-        
-        if True:
-          # HACK: since hashes are now in hex, 256 bit = 512 bits long.
-          # Therefore, chop them in half so that bits to output is 256 bits.
-          # Later can have them output in raw bytes/bites instead of hex,
-          # with no change to the MPC program.
-          commitment_token = fixed_length(commitment_token, 32)
-          secret_hash = fixed_length(secret_hash, 32)
-          secret = fixed_length(secret, 16)
-          
+                                      SETTLEMENT_KEY_WIDTH)              
         
         for submit_party in [party1, party2]:
           submitter = fixed_length(submit_party, SUBMITTER_WIDTH)
+          secret = generate_secret()
+          secret_hash = hash_value(secret)
+          
+          if True: # Hack chop the value
+            secret_hash = HACK_chop_value(secret_hash, 32)
+            secret = HACK_chop_value(secret, 16)
+          
+          # This commitment forces the submitters to commit to the settlement key
+          # and their names, as authenticated by their secrets.
+          # (technically should use original secret before hack chop, but it's same)
+          commitment_token = hash_value(settlement_key + submitter + secret)
+          commitment_token = HACK_chop_value(commitment_token, 32)
+
           original_submissions.append([
               day_since_2000,
               party1,
               party2,
               amount,
-              year_since_2000,              signature_date,
+              year_since_2000,
+              signature_date,
               submitter,
               commitment_token,
+
+              # For now, these values are not needed in the MPC computation.
+              # Submitters should keep them private to themselves.
               secret_hash,
               secret
-          ])        
+          ])
         
           submissions.append([
               to_bit_string(day_since_2000, 16, True),
