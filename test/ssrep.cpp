@@ -39,7 +39,7 @@ void recordParties(vector<SecureSubmission>& secureSubmissions,
   }
 }
 
-void markRepeatParties(vector<SecureParty>& secureParties) {
+void sortAndMarkRepeatParties(vector<SecureParty>& secureParties) {
   vec_based::sort<SecureParty, SecureParty>(
     &(secureParties), nullptr, false,
     &(bit_sort_by_name));
@@ -134,6 +134,7 @@ int process_submissions(int party, string prefix) {
       map<string, uint32_t> repeatedParties;
       vector<string> commitment_tokens;
 
+      // Initial statistics setup
       Integer sum64 = Integer(64, 0, PUBLIC);
       Integer count = Integer(32, 0, PUBLIC);
       vector<Integer> histogram;
@@ -147,6 +148,8 @@ int process_submissions(int party, string prefix) {
         yearly.push_back(Integer(32, 0, PUBLIC));
       }
 
+      // *** Begin processing
+
       xorReconstructSubmissions(subA, subB, secureSubmissions);
 
       vec_based::sort<SecureSubmission, SecureSubmission>(
@@ -157,7 +160,7 @@ int process_submissions(int party, string prefix) {
       
       recordParties(secureSubmissions, secureParties);
       
-      markRepeatParties(secureParties);
+      sortAndMarkRepeatParties(secureParties);
       
       unmaskRepeatParties(secureParties, repeatedParties);
 
@@ -165,6 +168,8 @@ int process_submissions(int party, string prefix) {
                         yearly, yearlyBounds, secureSubmissions);
 
       recordCommitmentTokens(secureSubmissions, commitment_tokens);
+
+      // *** Completed processing
 
       if(false) {
         printSubmissions(secureSubmissions);
