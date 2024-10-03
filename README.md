@@ -1,2 +1,45 @@
 # secure-settlement-reporting
- Secure Settlement Reporting
+This repository implements a prototype secure settlement reporting registry.
+
+## Quick Review
+
+The logic of the program is simple and can be reviewed quickly
+in test/ssrep.cpp, specifically the process_submissions function.
+
+## Generating Sample Data
+
+A sample data of settlement can be generated:
+
+`python gen.py [settlement_count]`
+
+For example, to generate a sample dataset in the current directory with 2000 settlements:
+
+`python gen.py 2000`
+
+Or, to organize the data:
+
+`mkdir data_2k; cd data_2k; python gen.py 2000`
+
+## Running MPC computation
+To perform a run of the MPC computation, run two processes:
+
+Process A:
+`bin/ssrep 1 [settlement_data_dir]`
+
+Process B:
+`bin/ssrep 2 [settlement_data_dir] [PORT_ON_A] [IP_TO_A]`
+
+The settlement_data_dir should refer to the exact same settlement, 
+except that A only needs access to the _a file, and B only needs access to the _b file.
+
+For example, to run on localhost and using the data from 'data/10k/', run as follow:
+
+Process A:
+`bin/ssrep 1 data/10k/`
+
+Process B:
+`bin/ssrep 2 data/10k/ 9999 127.0.0.1`
+
+The programs will connect and execute an MPC computation.
+Results will be printed to the console.
+

@@ -1,0 +1,304 @@
+
+Logging to log_3378.csv for command: bin/ssrep 1 data/100k (PID: 3378)
+Alice listening for Bob on port 9999...
+connected
+
+===== Program running...
+Reading from file: data/100k/submission_bits_a.txt
+Total count of 100000, the sum amount is $299672363, and average is $2996
+Commitment token samples: 8f44a66a5afd1e847b3113696ebe5633 8f44a66a5afd1e847b3113696ebe5633 5761e5bde58a61cfa02a48f98c4eed1e
+Histogram:
+0 - 1000: 0
+1000 - 2000: 24986
+2000 - 3000: 25157
+3000 - 4000: 24928
+4000 - 5000: 24907
+5000 - 6000: 22
+6000 - 7000: 0
+7000 - 8000: 0
+8000 - 9000: 0
+Yearly:
+2000 - 2018: 28676
+2018 - 2019: 12837
+2019 - 2020: 12483
+2020 - 2021: 12532
+2021 - 2022: 12326
+2022 - 2023: 12463
+2023 - 2024: 8683
+Repeated parties settled >= 3
+* Repeat party: Alice4780 Lee9120                        settlements: 3
+* Repeat party: Alice8523 Brown8693                      settlements: 4
+* Repeat party: Dave7155 Johnson9645                     settlements: 5
+
+===== Program completed  (9428.71 s | 85389.8 M gates)
+Initial Network Traffic:
+        RX packets 8459888  bytes 1087840616 (1.0 GB)
+        TX packets 11596142  bytes 239945988557 (239.9 GB)
+        RX packets 233  bytes 26882 (26.8 KB)
+        TX packets 233  bytes 26882 (26.8 KB)
+Final Network Traffic:
+        RX packets 68325032  bytes 8558343414 (8.5 GB)
+        TX packets 108003868  bytes 2979132936766 (2.9 TB)
+        RX packets 736  bytes 60127 (60.1 KB)
+        TX packets 736  bytes 60127 (60.1 KB)
+Peak RAM: 8603.96 MB at Mon Sep  9 23:26:28 CDT 2024 (1h:25m from start)
+
+
+
+Logging to log_3487.csv for command: bin/ssrep 2 data/100k 9999 10.128.0.30 (PID: 3487)
+connected
+
+===== Program running...
+Reading from file: data/100k/submission_bits_b.txt
+Total count of 100000, the sum amount is $299672363, and average is $2996
+Commitment token samples: 8f44a66a5afd1e847b3113696ebe5633 8f44a66a5afd1e847b3113696ebe5633 5761e5bde58a61cfa02a48f98c4eed1e
+Histogram:
+0 - 1000: 0
+1000 - 2000: 24986
+2000 - 3000: 25157
+3000 - 4000: 24928
+4000 - 5000: 24907
+5000 - 6000: 22
+6000 - 7000: 0
+7000 - 8000: 0
+8000 - 9000: 0
+Yearly:
+2000 - 2018: 28676
+2018 - 2019: 12837
+2019 - 2020: 12483
+2020 - 2021: 12532
+2021 - 2022: 12326
+2022 - 2023: 12463
+2023 - 2024: 8683
+Repeated parties settled >= 3
+* Repeat party: Alice4780 Lee9120                        settlements: 3
+* Repeat party: Alice8523 Brown8693                      settlements: 4
+* Repeat party: Dave7155 Johnson9645                     settlements: 5
+
+===== Program completed  (9435.26 s | 85389.8 M gates)
+Initial Network Traffic:
+        RX packets 15251510  bytes 240186579578 (240.1 GB)
+        TX packets 8457771  bytes 1087966081 (1.0 GB)
+        RX packets 241  bytes 27398 (27.3 KB)
+        TX packets 241  bytes 27398 (27.3 KB)
+Final Network Traffic:
+        RX packets 152017639  bytes 2981749995566 (2.9 TB)
+        TX packets 68268648  bytes 8554618635 (8.5 GB)
+        RX packets 756  bytes 61219 (61.2 KB)
+        TX packets 756  bytes 61219 (61.2 KB)
+Peak RAM: 8603.98 MB at Mon Sep  9 23:26:37 CDT 2024 (1h:25m from start)
+
+
+
+
+/////////////////////////////
+
+
+Logging to log_2412.csv for command: bin/ssrep 1 data/100k (PID: 2412)
+Alice listening for Bob on port 9999...
+connected
+
+===== Program running...
+Reading from file: data/100k/submission_bits_a.txt
+Total count of 100000, the sum amount is $299672363, and average is $2996
+Commitment token samples: 8f44a66a5afd1e847b3113696ebe5633 8f44a66a5afd1e847b3113696ebe5633 5761e5bde58a61cfa02a48f98c4eed1e
+Histogram:
+0 - 1000: 0
+1000 - 2000: 24986
+2000 - 3000: 25157
+3000 - 4000: 24928
+4000 - 5000: 24907
+5000 - 6000: 22
+6000 - 7000: 0
+7000 - 8000: 0
+8000 - 9000: 0
+Yearly:
+2000 - 2018: 28676
+2018 - 2019: 12837
+2019 - 2020: 12483
+2020 - 2021: 12532
+2021 - 2022: 12326
+2022 - 2023: 12463
+2023 - 2024: 8683
+Repeated parties settled >= 3
+* Repeat party: Alice4780 Lee9120                        settlements: 3
+* Repeat party: Alice8523 Brown8693                      settlements: 4
+* Repeat party: Dave7155 Johnson9645                     settlements: 5
+
+===== Program completed  (8904.01 s | 85389.8 M gates)
+Initial Network Traffic:
+        RX packets 2852553  bytes 364555825 (364.5 MB)
+        TX packets 3914130  bytes 79993116930 (79.9 GB)
+        RX packets 177  bytes 24373 (24.3 KB)
+        TX packets 177  bytes 24373 (24.3 KB)
+Final Network Traffic:
+        RX packets 63008242  bytes 7853877325 (7.8 GB)
+        TX packets 99521432  bytes 2818877183341 (2.8 TB)
+        RX packets 655  bytes 56443 (56.4 KB)
+        TX packets 655  bytes 56443 (56.4 KB)
+Peak RAM: 8567.41 MB at Mon Sep  9 23:28:45 CDT 2024 (1h:27m from start)
+
+Logging to log_2343.csv for command: bin/ssrep 2 data/100k 9999 10.128.0.32 (PID: 2343)
+connected
+
+===== Program running...
+Reading from file: data/100k/submission_bits_b.txt
+Total count of 100000, the sum amount is $299672363, and average is $2996
+Commitment token samples: 8f44a66a5afd1e847b3113696ebe5633 8f44a66a5afd1e847b3113696ebe5633 5761e5bde58a61cfa02a48f98c4eed1e
+Histogram:
+0 - 1000: 0
+1000 - 2000: 24986
+2000 - 3000: 25157
+3000 - 4000: 24928
+4000 - 5000: 24907
+5000 - 6000: 22
+6000 - 7000: 0
+7000 - 8000: 0
+8000 - 9000: 0
+Yearly:
+2000 - 2018: 28676
+2018 - 2019: 12837
+2019 - 2020: 12483
+2020 - 2021: 12532
+2021 - 2022: 12326
+2022 - 2023: 12463
+2023 - 2024: 8683
+Repeated parties settled >= 3
+* Repeat party: Alice4780 Lee9120                        settlements: 3
+* Repeat party: Alice8523 Brown8693                      settlements: 4
+* Repeat party: Dave7155 Johnson9645                     settlements: 5
+
+===== Program completed  (8910.26 s | 85389.8 M gates)
+Initial Network Traffic:
+        RX packets 5081450  bytes 80062121679 (80.0 GB)
+        TX packets 2849831  bytes 364309449 (364.3 MB)
+        RX packets 176  bytes 24325 (24.3 KB)
+        TX packets 176  bytes 24325 (24.3 KB)
+Final Network Traffic:
+        RX packets 142459813  bytes 2821666052496 (2.8 TB)
+        TX packets 62953406  bytes 7849970649 (7.8 GB)
+        RX packets 651  bytes 56251 (56.2 KB)
+        TX packets 651  bytes 56251 (56.2 KB)
+Peak RAM: 8603.98 MB at Mon Sep  9 23:27:54 CDT 2024 (1h:26m from start)
+
+
+
+
+
+
+/////////////////////////////
+
+Logging to log_15626.csv for command: bin/ssrep 1 data/100k (PID: 15626)
+Alice listening for Bob on port 9999...
+connected
+
+===== Program running...
+Reading from file: data/100k/submission_bits_a.txt
+
+
+
+Broadcast message from peter@asdf-3 (somewhere) (Tue Sep 10 03:00:01 2024):
+
+System overnight suspend in less than 15 min
+
+Total count of 100000, the sum amount is $299672363, and average is $2996
+Commitment token samples: 8f44a66a5afd1e847b3113696ebe5633 8f44a66a5afd1e847b3113696ebe5633 5761e5bde58a61cfa02a48f98c4eed1e
+Histogram:
+0 - 1000: 0
+1000 - 2000: 24986
+2000 - 3000: 25157
+3000 - 4000: 24928
+4000 - 5000: 24907
+5000 - 6000: 22
+6000 - 7000: 0
+7000 - 8000: 0
+8000 - 9000: 0
+Yearly:
+2000 - 2018: 28676
+2018 - 2019: 12837
+2019 - 2020: 12483
+2020 - 2021: 12532
+2021 - 2022: 12326
+2022 - 2023: 12463
+2023 - 2024: 8683
+Repeated parties settled >= 3
+* Repeat party: Alice4780 Lee9120                        settlements: 3
+* Repeat party: Alice8523 Brown8693                      settlements: 4
+* Repeat party: Dave7155 Johnson9645                     settlements: 5
+
+===== Program completed  (9481.86 s | 85389.8 M gates)
+Initial Network Traffic:
+        RX packets 68325836  bytes 8558501702 (8.5 GB)
+        TX packets 108004588  bytes 2979132999217 (2.9 TB)
+        RX packets 868  bytes 66488 (66.4 KB)
+        TX packets 868  bytes 66488 (66.4 KB)
+Final Network Traffic:
+        RX packets 127483982  bytes 15982400320 (15.9 GB)
+        TX packets 204337146  bytes 5718327893897 (5.7 TB)
+        RX packets 1361  bytes 91055 (91.0 KB)
+        TX packets 1361  bytes 91055 (91.0 KB)
+Peak RAM: 8603.85 MB at Tue Sep 10 02:47:14 CDT 2024 (1h:25m from start)
+
+
+
+Logging to log_15517.csv for command: bin/ssrep 2 data/100k 9999 10.128.0.30 (PID: 15517)
+connected
+
+===== Program running...
+Reading from file: data/100k/submission_bits_b.txt
+
+Broadcast message from peter@asdf-4 (somewhere) (Tue Sep 10 03:00:01 2024):
+
+System overnight suspend in less than 15 min
+
+Total count of 100000, the sum amount is $299672363, and average is $2996
+Commitment token samples: 8f44a66a5afd1e847b3113696ebe5633 8f44a66a5afd1e847b3113696ebe5633 5761e5bde58a61cfa02a48f98c4eed1e
+Histogram:
+0 - 1000: 0
+1000 - 2000: 24986
+2000 - 3000: 25157
+3000 - 4000: 24928
+4000 - 5000: 24907
+5000 - 6000: 22
+6000 - 7000: 0
+7000 - 8000: 0
+8000 - 9000: 0
+Yearly:
+2000 - 2018: 28676
+2018 - 2019: 12837
+2019 - 2020: 12483
+2020 - 2021: 12532
+2021 - 2022: 12326
+2022 - 2023: 12463
+2023 - 2024: 8683
+Repeated parties settled >= 3
+* Repeat party: Alice4780 Lee9120                        settlements: 3
+* Repeat party: Alice8523 Brown8693                      settlements: 4
+* Repeat party: Dave7155 Johnson9645                     settlements: 5
+
+===== Program completed  (9486.12 s | 85389.8 M gates)
+Initial Network Traffic:
+        RX packets 152018697  bytes 2981750240012 (2.9 TB)
+        TX packets 68269512  bytes 8554737280 (8.5 GB)
+        RX packets 896  bytes 68192 (68.1 KB)
+        TX packets 896  bytes 68192 (68.1 KB)
+Final Network Traffic:
+        RX packets 288752181  bytes 5723311636601 (5.7 TB)
+        TX packets 127375493  bytes 15974775192 (15.9 GB)
+        RX packets 1402  bytes 93383 (93.3 KB)
+        TX packets 1402  bytes 93383 (93.3 KB)
+Peak RAM: 8603.88 MB at Tue Sep 10 02:47:17 CDT 2024 (1h:25m from start)
+
+
+/////////////////////////////
+
+
+
+
+
+
+
+/////////////////////////////
+
+
+
