@@ -1,5 +1,5 @@
-# Secure Settlement Reporting Registry Prototype
-This repository implements a basic prototype secure settlement reporting registry,
+# Secure Settlement Registry Prototype
+This repository implements a basic prototype secure settlement registry,
 using EMP-Toolkit.
 
 ## Quick Review
@@ -30,8 +30,9 @@ Process A:
 Process B:
 `bin/ssrep 2 [settlement_data_dir] [PORT_ON_A] [IP_TO_A]`
 
-The settlement_data_dir should refer to the exact same settlement, 
-except that A only needs access to the _a file, and B only needs access to the _b file.
+The 'settlement_data_dir' should refer to the exact same generated settlement data set, 
+except that A only needs access to the 'submission_bits_a.txt' file,
+and B only needs access to the 'submission_bits_b.txt' file.
 
 For example, to run on localhost and using the data from 'data_2k', run as follow:
 
