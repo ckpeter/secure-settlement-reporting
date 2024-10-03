@@ -1,5 +1,5 @@
-# Secure Settlement Registry Prototype
-This repository implements a basic prototype secure settlement registry,
+# Secure Settlement Registry
+This repository implements a basic prototype of a generic secure settlement registry,
 using EMP-Toolkit.
 
 ## Quick Review
