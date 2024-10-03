@@ -1,5 +1,6 @@
-# secure-settlement-reporting
-This repository implements a prototype secure settlement reporting registry.
+# Secure Settlement Reporting Registry Prototype
+This repository implements a basic prototype secure settlement reporting registry,
+using EMP-Toolkit.
 
 ## Quick Review
 
@@ -35,10 +36,10 @@ except that A only needs access to the _a file, and B only needs access to the _
 For example, to run on localhost and using the data from 'data/10k/', run as follow:
 
 Process A:
-`bin/ssrep 1 data/10k/`
+`bin/ssrep 1 data_2k/`
 
 Process B:
-`bin/ssrep 2 data/10k/ 9999 127.0.0.1`
+`bin/ssrep 2 data_2k/ 9999 127.0.0.1`
 
 The programs will connect and execute an MPC computation.
 Results will be printed to the console.
